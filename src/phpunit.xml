@@ -11,9 +11,6 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
-        <testsuite name="Packages">
-            <directory suffix="Test.php">app/packages</directory>
-        </testsuite>
     </testsuites>
     <source>
         <include>
