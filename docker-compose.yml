@@ -35,9 +35,23 @@ services:
     networks:
       - laravel
 
+  mongo:
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: laravel_upload
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - laravel
+
 networks:
   laravel:
     driver: bridge
 
 volumes:
   db_data:
+  mongo_data:
