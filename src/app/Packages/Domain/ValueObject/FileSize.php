@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Packages\Domain\File\ValueObject;
+namespace App\Packages\Domain\ValueObject;
 
-use App\Packages\Domain\File\Exception\InvalidFileSizeException;
+use App\Packages\Domain\Exception\InvalidFileSizeException;
 
 final class FileSize
 {

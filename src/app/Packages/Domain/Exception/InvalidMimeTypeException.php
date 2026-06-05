@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Packages\Domain\File\Exception;
+namespace App\Packages\Domain\Exception;
 
 use DomainException;
 
