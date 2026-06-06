@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Packages\Domain\File\Exception\InvalidFileSizeException;
-use App\Packages\Domain\File\ValueObject\FileSize;
+use App\Packages\Domain\Exception\InvalidFileSizeException;
+use App\Packages\Domain\ValueObject\FileSize;
 
 describe('FileSize', function () {
     describe('constructor', function () {

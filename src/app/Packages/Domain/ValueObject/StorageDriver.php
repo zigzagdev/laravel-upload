@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Packages\Domain\File\ValueObject;
+namespace App\Packages\Domain\ValueObject;
 
 enum StorageDriver: string
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Packages\Domain\File\ValueObject\StorageDriver;
+use App\Packages\Domain\ValueObject\StorageDriver;
 
 describe('StorageDriver', function () {
     it('has S3 case with value "s3"', function () {

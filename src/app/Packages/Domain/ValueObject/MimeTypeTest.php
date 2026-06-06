@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Packages\Domain\File\Exception\InvalidMimeTypeException;
-use App\Packages\Domain\File\ValueObject\MimeType;
+use App\Packages\Domain\Exception\InvalidMimeTypeException;
+use App\Packages\Domain\ValueObject\MimeType;
 
 describe('MimeType', function () {
     describe('constructor', function () {

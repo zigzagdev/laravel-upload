@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Packages\Domain\File\Entity;
+namespace App\Packages\Domain\Entity;
 
-use App\Packages\Domain\File\ValueObject\FileId;
-use App\Packages\Domain\File\ValueObject\FileName;
-use App\Packages\Domain\File\ValueObject\FileSize;
-use App\Packages\Domain\File\ValueObject\FilePath;
-use App\Packages\Domain\File\ValueObject\MimeType;
-use App\Packages\Domain\File\ValueObject\StorageDriver;
+use App\Packages\Domain\ValueObject\FileId;
+use App\Packages\Domain\ValueObject\FileName;
+use App\Packages\Domain\ValueObject\FilePath;
+use App\Packages\Domain\ValueObject\FileSize;
+use App\Packages\Domain\ValueObject\MimeType;
+use App\Packages\Domain\ValueObject\StorageDriver;
 
 final class UploadFile
 {
@@ -78,5 +78,16 @@ final class UploadFile
     public function storageDriver(): StorageDriver
     {
         return $this->storageDriver;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'fileId' => $this->fileId()->value(),
+            'fileName' => $this->fileName()->value(),
+            'fileSize' => $this->fileSize->value(),
+            'mimeType' => $this->mimeType->value(),
+            'filePath' => $this->filePath->value(),
+        ];
     }
 }

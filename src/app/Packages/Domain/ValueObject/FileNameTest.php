@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Packages\Domain\File\Exception\InvalidFileNameException;
-use App\Packages\Domain\File\ValueObject\FileName;
+use App\Packages\Domain\Exception\InvalidFileNameException;
+use App\Packages\Domain\ValueObject\FileName;
 
 describe('FileName', function () {
     describe('constructor', function () {
@@ -14,7 +14,7 @@ describe('FileName', function () {
         });
 
         it('accepts a name at exactly 255 characters', function () {
-            $name = new FileName(str_repeat('a', 254) . '.txt');
+            $name = new FileName(str_repeat('a', 251) . '.txt');
 
             expect(mb_strlen($name->value()))->toBe(255);
         });

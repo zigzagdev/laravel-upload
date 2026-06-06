@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Packages\Domain\File\ValueObject\FilePath;
+use App\Packages\Domain\ValueObject\FilePath;
 
 describe('FilePath', function () {
     describe('constructor', function () {

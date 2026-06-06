@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Packages\Domain\File\Entity\UploadFile;
-use App\Packages\Domain\File\ValueObject\FileId;
-use App\Packages\Domain\File\ValueObject\FileName;
-use App\Packages\Domain\File\ValueObject\FileSize;
-use App\Packages\Domain\File\ValueObject\FilePath;
-use App\Packages\Domain\File\ValueObject\MimeType;
-use App\Packages\Domain\File\ValueObject\StorageDriver;
+use App\Packages\Domain\Entity\UploadFile;
+use App\Packages\Domain\ValueObject\FileId;
+use App\Packages\Domain\ValueObject\FileName;
+use App\Packages\Domain\ValueObject\FileSize;
+use App\Packages\Domain\ValueObject\FilePath;
+use App\Packages\Domain\ValueObject\MimeType;
+use App\Packages\Domain\ValueObject\StorageDriver;
 
 describe('UploadFile', function () {
     $defaults = fn () => [
@@ -21,7 +21,7 @@ describe('UploadFile', function () {
 
     describe('create()', function () use ($defaults) {
         it('creates an entity with an auto-generated FileId', function () use ($defaults) {
-            $d = $defaults();
+            $d    = $defaults();
             $file = UploadFile::create(
                 $d['fileName'],
                 $d['fileSize'],
@@ -43,7 +43,7 @@ describe('UploadFile', function () {
         });
 
         it('stores all provided values', function () use ($defaults) {
-            $d = $defaults();
+            $d    = $defaults();
             $file = UploadFile::create(
                 $d['fileName'],
                 $d['fileSize'],
@@ -62,10 +62,9 @@ describe('UploadFile', function () {
 
     describe('reconstitute()', function () use ($defaults) {
         it('restores an entity with the given FileId', function () use ($defaults) {
-            $d = $defaults();
+            $d      = $defaults();
             $fileId = new FileId('550e8400-e29b-41d4-a716-446655440000');
-
-            $file = UploadFile::reconstitute(
+            $file   = UploadFile::reconstitute(
                 $fileId,
                 $d['fileName'],
                 $d['fileSize'],
@@ -78,10 +77,9 @@ describe('UploadFile', function () {
         });
 
         it('preserves all values exactly', function () use ($defaults) {
-            $d = $defaults();
+            $d      = $defaults();
             $fileId = new FileId('550e8400-e29b-41d4-a716-446655440000');
-
-            $file = UploadFile::reconstitute(
+            $file   = UploadFile::reconstitute(
                 $fileId,
                 $d['fileName'],
                 $d['fileSize'],

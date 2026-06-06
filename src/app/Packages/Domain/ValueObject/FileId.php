@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Packages\Domain\File\ValueObject;
+namespace App\Packages\Domain\ValueObject;
 
-use InvalidArgumentException;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 final class FileId
 {

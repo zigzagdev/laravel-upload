@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Packages\Domain\File\ValueObject\FileId;
+use App\Packages\Domain\ValueObject\FileId;
 
 describe('FileId', function () {
     describe('constructor', function () {
