@@ -16,7 +16,7 @@ use App\Packages\Domain\ValueObject\FileSize;
 use App\Packages\Domain\ValueObject\MimeType;
 use App\Packages\Domain\ValueObject\StorageDriver;
 
-final class UploadFileUseCase
+class UploadFileUseCase
 {
     public function __construct(
         private readonly CloudStorageInterface        $cloudStorage,
