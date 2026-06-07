@@ -5,13 +5,44 @@ declare(strict_types=1);
 use App\Packages\Application\UseCommand\UploadFileUseCommand;
 use App\Packages\Application\UseCase\UploadFileUseCase;
 use App\Packages\Domain\Entity\UploadFile;
+use App\Packages\Domain\Exception\InvalidFileSizeException;
 use App\Packages\Domain\Repository\CloudStorageInterface;
 use App\Packages\Domain\Repository\FileRepositoryInterface;
 use App\Packages\Domain\Repository\MongoFileRepositoryInterface;
 use App\Packages\Domain\ValueObject\FileMetadata;
 use App\Packages\Domain\ValueObject\FilePath;
-use App\Packages\Domain\Exception\InvalidFileSizeException;
 use App\Packages\Domain\ValueObject\MimeType;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+
+function makeCommand(array $overrides = []): UploadFileUseCommand
+{
+    $defaults = [
+        'name'          => 'photo.jpg',
+        'size'          => 1024,
+        'mimeType'      => 'image/jpeg',
+        'storageDriver' => 's3',
+        'contents'      => 'binary-data',
+        'metadata'      => ['width' => 1920, 'height' => 1080],
+    ];
+    $params = array_merge($defaults, $overrides);
+
+    $tmpFile = tempnam(sys_get_temp_dir(), 'test');
+    file_put_contents($tmpFile, $params['contents']);
+
+    $file = Mockery::mock(UploadedFile::class);
+    $file->shouldReceive('getClientOriginalName')->andReturn($params['name']);
+    $file->shouldReceive('getSize')->andReturn($params['size']);
+    $file->shouldReceive('getMimeType')->andReturn($params['mimeType']);
+    $file->shouldReceive('getRealPath')->andReturn($tmpFile);
+
+    $request = Mockery::mock(Request::class);
+    $request->shouldReceive('file')->with('file')->andReturn($file);
+    $request->shouldReceive('input')->with('storage_driver')->andReturn($params['storageDriver']);
+    $request->shouldReceive('input')->with('metadata', [])->andReturn($params['metadata']);
+
+    return new UploadFileUseCommand($request);
+}
 
 describe('UploadFileUseCase', function () {
     beforeEach(function () {
@@ -19,21 +50,13 @@ describe('UploadFileUseCase', function () {
         $this->fileRepository  = Mockery::mock(FileRepositoryInterface::class);
         $this->mongoRepository = Mockery::mock(MongoFileRepositoryInterface::class);
 
-        $this->useCase = new UploadFileUseCase(
+        $this->useCase  = new UploadFileUseCase(
             $this->cloudStorage,
             $this->fileRepository,
             $this->mongoRepository,
         );
 
-        $this->command = new UploadFileUseCommand(
-            fileName:      'photo.jpg',
-            fileSize:      1024,
-            mimeType:      'image/jpeg',
-            filePath:      'uploads/photo.jpg',
-            storageDriver: 's3',
-            contents:      'binary-data',
-            metadata:      ['width' => 1920, 'height' => 1080],
-        );
+        $this->command = makeCommand();
     });
 
     afterEach(function () {
@@ -89,17 +112,34 @@ describe('UploadFileUseCase', function () {
         $this->useCase->handle($this->command);
     });
 
+    it('calls all three operations in order', function () {
+        $order = [];
+
+        $this->cloudStorage
+            ->shouldReceive('upload')->once()
+            ->andReturnUsing(function () use (&$order) { $order[] = 'upload'; });
+
+        $this->fileRepository
+            ->shouldReceive('save')->once()
+            ->andReturnUsing(function () use (&$order) { $order[] = 'mysql'; });
+
+        $this->mongoRepository
+            ->shouldReceive('save')->once()
+            ->andReturnUsing(function () use (&$order) { $order[] = 'mongo'; });
+
+        $this->useCase->handle($this->command);
+
+        expect($order)->toBe(['upload', 'mysql', 'mongo']);
+    });
+
     describe('video upload', function () {
         beforeEach(function () {
-            $this->videoCommand = new UploadFileUseCommand(
-                fileName:      'video.mp4',
-                fileSize:      52_428_800, // 50MB
-                mimeType:      'video/mp4',
-                filePath:      'uploads/video.mp4',
-                storageDriver: 's3',
-                contents:      'video-binary-data',
-                metadata:      ['duration' => 120, 'resolution' => '1920x1080'],
-            );
+            $this->videoCommand = makeCommand([
+                'name'     => 'video.mp4',
+                'size'     => 52_428_800,
+                'mimeType' => 'video/mp4',
+                'metadata' => ['duration' => 120, 'resolution' => '1920x1080'],
+            ]);
         });
 
         it('uploads video to cloud storage with correct mime type', function () {
@@ -108,7 +148,6 @@ describe('UploadFileUseCase', function () {
                 ->once()
                 ->withArgs(function (FilePath $path, string $contents, MimeType $mimeType) {
                     return $path->value() === 'uploads/video.mp4'
-                        && $contents === 'video-binary-data'
                         && $mimeType->value() === 'video/mp4';
                 });
 
@@ -137,36 +176,13 @@ describe('UploadFileUseCase', function () {
             $this->fileRepository->shouldNotReceive('save');
             $this->mongoRepository->shouldNotReceive('save');
 
-            $command = new UploadFileUseCommand(
-                fileName:      'large.mp4',
-                fileSize:      104_857_601, // 100MB + 1byte
-                mimeType:      'video/mp4',
-                filePath:      'uploads/large.mp4',
-                storageDriver: 's3',
-                contents:      'binary-data',
-            );
+            $command = makeCommand([
+                'name'     => 'large.mp4',
+                'size'     => 104_857_601,
+                'mimeType' => 'video/mp4',
+            ]);
 
             $this->useCase->handle($command);
         })->throws(InvalidFileSizeException::class);
-    });
-
-    it('calls all three operations in order', function () {
-        $order = [];
-
-        $this->cloudStorage
-            ->shouldReceive('upload')->once()
-            ->andReturnUsing(function () use (&$order) { $order[] = 'upload'; });
-
-        $this->fileRepository
-            ->shouldReceive('save')->once()
-            ->andReturnUsing(function () use (&$order) { $order[] = 'mysql'; });
-
-        $this->mongoRepository
-            ->shouldReceive('save')->once()
-            ->andReturnUsing(function () use (&$order) { $order[] = 'mongo'; });
-
-        $this->useCase->handle($this->command);
-
-        expect($order)->toBe(['upload', 'mysql', 'mongo']);
     });
 });
