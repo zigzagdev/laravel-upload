@@ -8,7 +8,11 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libssl-dev \
+    pkg-config \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
